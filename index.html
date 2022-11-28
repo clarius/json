@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en-US">
+
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width,maximum-scale=2">
+    <link rel="stylesheet" type="text/css" media="screen" href="/json/assets/css/style.css?v=1dd36b4f01846c94af0d78846674b24db07a2a7c">
+
+<!-- Begin Jekyll SEO tag v2.6.1 -->
+<title>JsonPeek and JsonPoke MSBuild Tasks | json</title>
+<meta name="generator" content="Jekyll v3.9.0" />
+<meta property="og:title" content="JsonPeek and JsonPoke MSBuild Tasks" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="JsonPeek and JsonPoke tasks implementations" />
+<meta property="og:description" content="JsonPeek and JsonPoke tasks implementations" />
+<meta property="og:site_name" content="json" />
+<script type="application/ld+json">
+{"@type":"WebSite","headline":"JsonPeek and JsonPoke MSBuild Tasks","url":"/json/","description":"JsonPeek and JsonPoke tasks implementations","name":"json","@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/devlooped/json">View on GitHub</a>
+
+          <h1 id="project_title">json</h1>
+          <h2 id="project_tagline">JsonPeek and JsonPoke tasks implementations</h2>
+
+          
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+        <h1 id="-jsonpeek-and-jsonpoke-msbuild-tasks"><img src="/json/assets/img/json.png" alt="JSON Icon" /> JsonPeek and JsonPoke MSBuild Tasks</h1>
+
+<p><a href="https://github.com/devlooped/json/blob/main/license.txt"><img src="https://img.shields.io/github/license/devlooped/json.svg?color=blue" alt="License" /></a>
+<a href="https://github.com/devlooped/json/actions"><img src="https://github.com/devlooped/json/workflows/build/badge.svg?branch=main" alt="Build" /></a></p>
+
+<h1 id="-jsonpeek"><img src="/json/assets/img/jsonpeek.png" alt="JsonPeek Icon" /> JsonPeek</h1>
+
+<p><a href="https://www.nuget.org/packages/JsonPeek"><img src="https://img.shields.io/nuget/vpre/JsonPeek.svg?color=royalblue" alt="Version" /></a>
+<a href="https://www.nuget.org/packages/JsonPeek"><img src="https://img.shields.io/nuget/dt/JsonPeek.svg?color=green" alt="Downloads" /></a></p>
+
+<!-- #JsonPeek -->
+<p>Read values from JSON using JSONPath.</p>
+
+<p>Usage:</p>
+
+<div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="nt">&lt;JsonPeek</span> <span class="na">ContentPath=</span><span class="s">"[JSON_FILE]"</span> <span class="na">Query=</span><span class="s">"[JSONPath]"</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;Output</span> <span class="na">TaskParameter=</span><span class="s">"Result"</span> <span class="na">PropertyName=</span><span class="s">"Value"</span> <span class="nt">/&gt;</span>
+  <span class="nt">&lt;/JsonPeek&gt;</span>
+  <span class="nt">&lt;JsonPeek</span> <span class="na">Content=</span><span class="s">"[JSON]"</span> <span class="na">Query=</span><span class="s">"[JSONPath]"</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;Output</span> <span class="na">TaskParameter=</span><span class="s">"Result"</span> <span class="na">ItemName=</span><span class="s">"Values"</span> <span class="nt">/&gt;</span>
+  <span class="nt">&lt;/JsonPeek&gt;</span>
+</code></pre></div></div>
+
+<p>Parameters:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Parameter</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Content</td>
+      <td>Optional <code class="language-plaintext highlighter-rouge">string</code> parameter.<br />Specifies the JSON input as a string.</td>
+    </tr>
+    <tr>
+      <td>ContentPath</td>
+      <td>Optional <code class="language-plaintext highlighter-rouge">ITaskItem</code> parameter.<br />Specifies the JSON input as a file path.</td>
+    </tr>
+    <tr>
+      <td>Empty</td>
+      <td>Optional <code class="language-plaintext highlighter-rouge">string</code> parameter.<br />Value to use as a replacement for empty values matched in JSON.</td>
+    </tr>
+    <tr>
+      <td>Query</td>
+      <td>Required <code class="language-plaintext highlighter-rouge">string</code> parameter.<br />Specifies the <a href="https://goessner.net/articles/JsonPath/">JSONPath</a> expression.</td>
+    </tr>
+    <tr>
+      <td>Result</td>
+      <td>Output <code class="language-plaintext highlighter-rouge">ITaskItem[]</code> parameter.<br />Contains the results that are returned by the task.</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>You can either provide the path to a JSON file via <code class="language-plaintext highlighter-rouge">ContentPath</code> or 
+provide the straight JSON content to <code class="language-plaintext highlighter-rouge">Content</code>. The <code class="language-plaintext highlighter-rouge">Query</code> is a 
+<a href="https://goessner.net/articles/JsonPath/">JSONPath</a> expression that is evaluated 
+and returned via the <code class="language-plaintext highlighter-rouge">Result</code> task parameter. You can assign the resulting 
+value to either a property (i.e. for a single value) or an item name (i.e. 
+for multiple results).</p>
+
+<p>JSON object properties are automatically projected as item metadata when 
+assigning the resulting value to an item. For example, given the following JSON:</p>
+
+<pre><code class="language-JSON">{
+    "http": {
+        "host": "localhost",
+        "port": 80,
+        "ssl": true
+    }
+}
+</code></pre>
+
+<p>You can read the entire <code class="language-plaintext highlighter-rouge">http</code> value as an item with each property as a metadata 
+value with:</p>
+
+<div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;JsonPeek</span> <span class="na">ContentPath=</span><span class="s">"host.json"</span> <span class="na">Query=</span><span class="s">"$.http"</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;Output</span> <span class="na">TaskParameter=</span><span class="s">"Result"</span> <span class="na">ItemName=</span><span class="s">"Http"</span> <span class="nt">/&gt;</span>
+<span class="nt">&lt;/JsonPeek&gt;</span>
+</code></pre></div></div>
+
+<p>The <code class="language-plaintext highlighter-rouge">Http</code> item will have the following values (if it were declared in MSBuild):</p>
+
+<div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;ItemGroup&gt;</span>
+    <span class="nt">&lt;Http</span> <span class="na">Include=</span><span class="s">"[item raw json]"</span><span class="nt">&gt;</span>
+        <span class="nt">&lt;host&gt;</span>localhost<span class="nt">&lt;/host&gt;</span>
+        <span class="nt">&lt;port&gt;</span>80<span class="nt">&lt;/port&gt;</span>
+        <span class="nt">&lt;ssl&gt;</span>true<span class="nt">&lt;/ssl&gt;</span>
+    <span class="nt">&lt;/Http&gt;</span>
+<span class="nt">&lt;/ItemGroup&gt;</span>
+</code></pre></div></div>
+
+<p>These item metadata values could be read as MSBuild properties as follows, for example:</p>
+
+<div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;PropertyGroup&gt;</span>
+    <span class="nt">&lt;Host&gt;</span>@(Http -&gt; '%(host)')<span class="nt">&lt;/Host&gt;</span>
+    <span class="nt">&lt;Port&gt;</span>@(Http -&gt; '%(port)')<span class="nt">&lt;/Port&gt;</span>
+    <span class="nt">&lt;Ssl&gt;</span>@(Http -&gt; '%(ssl)')<span class="nt">&lt;/Ssl&gt;</span>
+<span class="nt">&lt;/PropertyGroup&gt;</span>
+</code></pre></div></div>
+
+<p>In addition to the explicitly opted in object properties, the entire node is available 
+as raw JSON via the special <code class="language-plaintext highlighter-rouge">_</code> (single underscore) metadata item.</p>
+
+<p>If the matched value is empty, no items (because items cannot be constructed with empty 
+identity) or property value will be returned. This makes it difficult to distinguish a 
+successfully matched empty value from no value matched at all. For these cases, it’s 
+possible to specify an <code class="language-plaintext highlighter-rouge">Empty</code> value to stand-in for an empty (but successful) matched 
+result instead, which allow to distinguish both scenarios:</p>
+
+<div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;JsonPeek</span> <span class="na">Content=</span><span class="s">"$(Json)"</span> <span class="na">Empty=</span><span class="s">"$empty"</span> <span class="na">Query=</span><span class="s">"$(Query)"</span><span class="nt">&gt;</span>
+  <span class="nt">&lt;Output</span> <span class="na">TaskParameter=</span><span class="s">"Result"</span> <span class="na">PropertyName=</span><span class="s">"Value"</span> <span class="nt">/&gt;</span>
+<span class="nt">&lt;/JsonPeek&gt;</span>
+
+<span class="nt">&lt;Error</span> <span class="na">Condition=</span><span class="s">"'$(Value)' == '$empty'"</span> <span class="na">Text=</span><span class="s">"The element $(Query) cannot have an empty value."</span> <span class="nt">/&gt;</span>
+</code></pre></div></div>
+
+<!-- #JsonPeek -->
+
+<h1 id="-jsonpoke"><img src="/json/assets/img/jsonpoke.png" alt="JsonPoke Icon" /> JsonPoke</h1>
+
+<p><a href="https://www.nuget.org/packages/JsonPoke"><img src="https://img.shields.io/nuget/vpre/JsonPoke.svg?color=royalblue" alt="Version" /></a>
+<a href="https://www.nuget.org/packages/JsonPoke"><img src="https://img.shields.io/nuget/dt/JsonPoke.svg?color=green" alt="Downloads" /></a></p>
+
+<!-- #JsonPoke -->
+<p>Write values to JSON nodes selected with JSONPath</p>
+
+<p>Usage:</p>
+
+<div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="nt">&lt;JsonPoke</span> <span class="na">ContentPath=</span><span class="s">"[JSON_FILE]"</span> <span class="na">Query=</span><span class="s">"[JSONPath]"</span> <span class="na">Value=</span><span class="s">"[VALUE]"</span> <span class="nt">/&gt;</span>
+  <span class="nt">&lt;JsonPoke</span> <span class="na">ContentPath=</span><span class="s">"[JSON_FILE]"</span> <span class="na">Query=</span><span class="s">"[JSONPath]"</span> <span class="na">RawValue=</span><span class="s">"[JSON]"</span> <span class="nt">/&gt;</span>
+  <span class="nt">&lt;JsonPoke</span> <span class="na">Content=</span><span class="s">"[JSON]"</span> <span class="na">Query=</span><span class="s">"[JSONPath]"</span> <span class="na">Value=</span><span class="s">"[VALUE]"</span> <span class="nt">/&gt;</span>
+</code></pre></div></div>
+
+<p>Parameters:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Parameter</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Content</td>
+      <td>Optional <code class="language-plaintext highlighter-rouge">string</code> input/output parameter.<br />Specifies the JSON input as a string and contains the updated<br />JSON after successful task execution.</td>
+    </tr>
+    <tr>
+      <td>ContentPath</td>
+      <td>Optional <code class="language-plaintext highlighter-rouge">ITaskItem</code> parameter.<br />Specifies the JSON input as a file path.</td>
+    </tr>
+    <tr>
+      <td>Query</td>
+      <td>Required <code class="language-plaintext highlighter-rouge">string</code> parameter.<br />Specifies the <a href="https://goessner.net/articles/JsonPath/">JSONPath</a> expression.</td>
+    </tr>
+    <tr>
+      <td>Value</td>
+      <td>Optional <code class="language-plaintext highlighter-rouge">ITaskItem[]</code> parameter.<br />Specifies the value(s) to be inserted into the specified path.</td>
+    </tr>
+    <tr>
+      <td>RawValue</td>
+      <td>Optional <code class="language-plaintext highlighter-rouge">string</code> parameter.<br />Specifies the raw (JSON) value to be inserted into the specified path.</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>You must either provide the path to a JSON file via <code class="language-plaintext highlighter-rouge">ContentPath</code> or 
+raw JSON content via <code class="language-plaintext highlighter-rouge">Content</code>.</p>
+
+<p>The <code class="language-plaintext highlighter-rouge">Value</code> can be an item group, and in that case, it will be inserted into the 
+JSON node matching the <a href="https://goessner.net/articles/JsonPath/">JSONPath</a> expression 
+<code class="language-plaintext highlighter-rouge">Query</code> as an array. <code class="language-plaintext highlighter-rouge">RawValue</code> can be used to provide 
+an entire JSON fragment as a string, with no conversion to an MSBuild item at all.</p>
+
+<p>The existing JSON node will determine the data type of the value being written, 
+so as to preserve the original document. Numbers, booleans and DateTimes are 
+properly parsed before serializing to the node.</p>
+
+<div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="nt">&lt;PropertyGroup&gt;</span>
+      <span class="nt">&lt;Json&gt;</span>
+{
+  "http": {
+    "host": "localhost",
+    "port": 80,
+    "ssl": true
+  }
+}
+      <span class="nt">&lt;/Json&gt;</span>
+    <span class="nt">&lt;/PropertyGroup&gt;</span>
+
+    <span class="nt">&lt;JsonPoke</span> <span class="na">Content=</span><span class="s">"$(Json)"</span> <span class="na">Query=</span><span class="s">"$.http.host"</span> <span class="na">Value=</span><span class="s">"example.com"</span><span class="nt">&gt;</span>
+      <span class="nt">&lt;Output</span> <span class="na">TaskParameter=</span><span class="s">"Content"</span> <span class="na">PropertyName=</span><span class="s">"Json"</span> <span class="nt">/&gt;</span>
+    <span class="nt">&lt;/JsonPoke&gt;</span>
+
+    <span class="nt">&lt;JsonPoke</span> <span class="na">Content=</span><span class="s">"$(Json)"</span> <span class="na">Query=</span><span class="s">"$.http.port"</span> <span class="na">Value=</span><span class="s">"80"</span><span class="nt">&gt;</span>
+      <span class="nt">&lt;Output</span> <span class="na">TaskParameter=</span><span class="s">"Content"</span> <span class="na">PropertyName=</span><span class="s">"Json"</span> <span class="nt">/&gt;</span>
+    <span class="nt">&lt;/JsonPoke&gt;</span>
+
+    <span class="nt">&lt;JsonPoke</span> <span class="na">Content=</span><span class="s">"$(Json)"</span> <span class="na">Query=</span><span class="s">"$.http.ssl"</span> <span class="na">Value=</span><span class="s">"true"</span><span class="nt">&gt;</span>
+      <span class="nt">&lt;Output</span> <span class="na">TaskParameter=</span><span class="s">"Content"</span> <span class="na">PropertyName=</span><span class="s">"Json"</span> <span class="nt">/&gt;</span>
+    <span class="nt">&lt;/JsonPoke&gt;</span>
+
+    <span class="nt">&lt;Message</span> <span class="na">Importance=</span><span class="s">"high"</span> <span class="na">Text=</span><span class="s">"$(Json)"</span> <span class="nt">/&gt;</span>
+</code></pre></div></div>
+
+<p>Note how we update multiple values and assign the updated content to the 
+same <code class="language-plaintext highlighter-rouge">$(Json)</code> property so it can be used in subsequent updates. The last 
+<code class="language-plaintext highlighter-rouge">Message</code> task will render the following JSON:</p>
+
+<pre><code class="language-JSON">{
+  "http": {
+    "host": "example.com",
+    "port": 80,
+    "ssl": true
+  }
+}
+</code></pre>
+
+<blockquote>
+  <p>NOTE: The port number was preserved as a number, as is the <code class="language-plaintext highlighter-rouge">ssl</code> boolean.</p>
+</blockquote>
+
+<p>To force a value to be interpreted as a string, you can surround it with double or single quotes.
+For example, given the following JSON file:</p>
+
+<pre><code class="language-JSON">{
+    "http": {
+        "ports": [
+            "80"
+        ]
+    }
+}
+</code></pre>
+
+<p>We can replace the <code class="language-plaintext highlighter-rouge">ports</code> array with string values as follows (without the 
+explicit quotes, the values would be interpreted as numbers otherwise):</p>
+
+<div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="nt">&lt;ItemGroup&gt;</span>
+    <span class="nt">&lt;HttpPort</span> <span class="na">Include=</span><span class="s">"'8080'"</span> <span class="nt">/&gt;</span>
+    <span class="nt">&lt;HttpPort</span> <span class="na">Include=</span><span class="s">"'1080'"</span> <span class="nt">/&gt;</span>
+  <span class="nt">&lt;/ItemGroup&gt;</span>
+
+  <span class="nt">&lt;JsonPoke</span> <span class="na">ContentPath=</span><span class="s">"http.json"</span> <span class="na">Query=</span><span class="s">"$.http.ports"</span> <span class="na">Value=</span><span class="s">"@(HttpPort)"</span> <span class="nt">/&gt;</span>
+</code></pre></div></div>
+
+<p>Result:</p>
+
+<pre><code class="language-JSON">{
+    "http": {
+        "ports": [
+            "8080", 
+            "1080"
+        ]
+    }
+}
+</code></pre>
+
+<p>It’s also possible to write a complex object based on MSBuild item metadata:</p>
+
+<div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code>   <span class="nt">&lt;ItemGroup&gt;</span>
+     <span class="nt">&lt;Http</span> <span class="na">Include=</span><span class="s">"Value"</span><span class="nt">&gt;</span>
+       <span class="nt">&lt;host&gt;</span>localhost<span class="nt">&lt;/host&gt;</span>
+       <span class="nt">&lt;port&gt;</span>80<span class="nt">&lt;/port&gt;</span>
+       <span class="nt">&lt;ssl&gt;</span>true<span class="nt">&lt;/ssl&gt;</span>
+     <span class="nt">&lt;/Value&gt;</span>
+   <span class="nt">&lt;/ItemGroup&gt;</span>
+
+   <span class="nt">&lt;JsonPoke</span> <span class="na">ContentPath=</span><span class="s">"http.json"</span> <span class="na">Query=</span><span class="s">"$.http"</span> <span class="na">Value=</span><span class="s">"@(Http)"</span> <span class="na">Properties=</span><span class="s">"host;port;ssl"</span> <span class="nt">/&gt;</span>
+</code></pre></div></div>
+
+<p>Result:</p>
+
+<pre><code class="language-JSON">{
+    "http": {
+        "host": "localhost",
+        "port": 80,
+        "ssl": true
+    }
+}
+</code></pre>
+
+<p>Note how the native JSON type was automatically inferred, even though everything is 
+basically a string in MSBuild. As noted above, you can surround any of the item metadata 
+values in double or single quotes to force them to be written as strings instead.</p>
+
+<p>The task can create entire object hierarchies if any segment of the path expression is 
+not found, which makes it very easy to create complex structures by assigning a single 
+value. For example, if the <code class="language-plaintext highlighter-rouge">http</code> section in the examples above didn’t exist at all, 
+the following task would add it automatically, prior to assigning the <code class="language-plaintext highlighter-rouge">ssl</code> property to <code class="language-plaintext highlighter-rouge">true</code>:</p>
+
+<div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;JsonPoke</span> <span class="na">ContentPath=</span><span class="s">"http.json"</span> <span class="na">Query=</span><span class="s">"$.http.ssl"</span> <span class="na">Value=</span><span class="s">"true"</span> <span class="nt">/&gt;</span>
+</code></pre></div></div>
+
+<p>This also works for indexed queries, such as adding launch profile to 
+<a href="https://docs.microsoft.com/en-us/aspnet/core/fundamentals/environments?view=aspnetcore-6.0#lsj">launchSettings.json</a> 
+by simply assigning a value:</p>
+
+<div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;JsonPoke</span> <span class="na">ContentPath=</span><span class="s">"Properties\launchSettings.json"</span> <span class="na">Query=</span><span class="s">"$.profiles['IIS Express'].commandName"</span> <span class="na">Value=</span><span class="s">"IISExpress"</span> <span class="nt">/&gt;</span>
+</code></pre></div></div>
+
+<p>which would create the following entry:</p>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"profiles"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"IIS Express"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"commandName"</span><span class="p">:</span><span class="w"> </span><span class="s2">"IISExpress"</span><span class="p">,</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<p>Array index is also supported as part of the query, to modify existing values. If the array is empty 
+or non-existent, it’s also possible to just use the index <code class="language-plaintext highlighter-rouge">[0]</code> to denote the new node should be the 
+sole element in the new array, like for adding a new watch file value to 
+<a href="https://docs.microsoft.com/en-us/azure/azure-functions/functions-host-json">host.json</a>:</p>
+
+<div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;JsonPoke</span> <span class="na">ContentPath=</span><span class="s">"host.json"</span> <span class="na">Query=</span><span class="s">"$.watchFiles[0]"</span> <span class="na">Value=</span><span class="s">"myFile.txt"</span> <span class="nt">/&gt;</span>
+</code></pre></div></div>
+
+<p>Which results in:</p>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="err">...</span><span class="w">
+  </span><span class="nl">"watchFiles"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="s2">"myFile.txt"</span><span class="w"> </span><span class="p">]</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<p>It’s quite common to want to add entries to an existing array, usually at the end of the array. The 
+JSONPath syntax supports indexes that start from the end of the array (such as <code class="language-plaintext highlighter-rouge">[-1:]</code>), but if the 
+array had any values already, that would match whichever is the last element, meaning in an <em>update</em> 
+to that element’s value. Since we need a different syntax for <em>inserting</em> a new node, starting from 
+the end of the list, we leverage the C# syntax <code class="language-plaintext highlighter-rouge">^n</code> where <code class="language-plaintext highlighter-rouge">n</code> is the position starting from the end. 
+To add a new element at the end of the list, the index <code class="language-plaintext highlighter-rouge">[^1]</code> can be used. <code class="language-plaintext highlighter-rouge">^2</code> means prior to last
+and so on.</p>
+
+<p>For example, to <em>add</em> a new watched file to the array in the example above, we could use:</p>
+
+<div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;JsonPoke</span> <span class="na">ContentPath=</span><span class="s">"host.json"</span> <span class="na">Query=</span><span class="s">"$.watchFiles[^1]"</span> <span class="na">Value=</span><span class="s">"myOtherFile.txt"</span> <span class="nt">/&gt;</span>
+</code></pre></div></div>
+
+<p>Given an existing <code class="language-plaintext highlighter-rouge">host.json</code> file like the one above, we would get a new file added like so:</p>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="err">...</span><span class="w">
+  </span><span class="nl">"watchFiles"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="s2">"myFile.txt"</span><span class="p">,</span><span class="w"> </span><span class="s2">"myOtherFile.txt"</span><span class="w"> </span><span class="p">]</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<p>If the <code class="language-plaintext highlighter-rouge">watchFiles</code> property didn’t exit at all or had no elements, the result would be 
+the same as if we used <code class="language-plaintext highlighter-rouge">[0]</code>, but this makes the code more flexible if needed.</p>
+
+<p>The modified JSON nodes can be assigned to an item name using the <code class="language-plaintext highlighter-rouge">Result</code> task property, 
+and will contain the item path (matching the <code class="language-plaintext highlighter-rouge">Query</code> plus the index if multiple nodes were modified) 
+as well as the <code class="language-plaintext highlighter-rouge">Value</code> item metadata containing the raw JSON that was written.</p>
+
+<!-- #JsonPoke -->
+
+<h1 id="dogfooding">Dogfooding</h1>
+
+<p><a href="https://pkg.kzu.io/index.json"><img src="https://img.shields.io/endpoint?url=https://shields.kzu.io/vpre/JsonPeek/main&amp;label=nuget.ci&amp;color=brightgreen" alt="CI Version" /></a>
+<a href="https://github.com/devlooped/json/actions"><img src="https://github.com/devlooped/json/workflows/build/badge.svg?branch=main" alt="Build" /></a></p>
+
+<p>We also produce CI packages from branches and pull requests so you can dogfood builds as quickly as they are produced.</p>
+
+<p>The CI feed is <code class="language-plaintext highlighter-rouge">https://pkg.kzu.io/index.json</code>.</p>
+
+<p>The versioning scheme for packages is:</p>
+
+<ul>
+  <li>PR builds: <em>42.42.42-pr</em><code class="language-plaintext highlighter-rouge">[NUMBER]</code></li>
+  <li>Branch builds: <em>42.42.42-</em><code class="language-plaintext highlighter-rouge">[BRANCH]</code>.<code class="language-plaintext highlighter-rouge">[COMMITS]</code></li>
+</ul>
+
+<!-- include https://github.com/devlooped/sponsors/raw/main/footer.md -->
+<h1 id="sponsors">Sponsors</h1>
+
+<!-- sponsors.md -->
+<p><a href="https://github.com/clarius"><img src="https://raw.githubusercontent.com/devlooped/sponsors/main/.github/avatars/clarius.png" alt="Clarius Org" title="Clarius Org" /></a>
+<a href="https://github.com/MelbourneDeveloper"><img src="https://raw.githubusercontent.com/devlooped/sponsors/main/.github/avatars/MelbourneDeveloper.png" alt="Christian Findlay" title="Christian Findlay" /></a>
+<a href="https://github.com/augustoproiete"><img src="https://raw.githubusercontent.com/devlooped/sponsors/main/.github/avatars/augustoproiete.png" alt="C. Augusto Proiete" title="C. Augusto Proiete" /></a>
+<a href="https://github.com/KirillOsenkov"><img src="https://raw.githubusercontent.com/devlooped/sponsors/main/.github/avatars/KirillOsenkov.png" alt="Kirill Osenkov" title="Kirill Osenkov" /></a>
+<a href="https://github.com/MFB-Technologies-Inc"><img src="https://raw.githubusercontent.com/devlooped/sponsors/main/.github/avatars/MFB-Technologies-Inc.png" alt="MFB Technologies, Inc." title="MFB Technologies, Inc." /></a>
+<a href="https://github.com/sandrock"><img src="https://raw.githubusercontent.com/devlooped/sponsors/main/.github/avatars/sandrock.png" alt="SandRock" title="SandRock" /></a>
+<a href="https://github.com/eeseewy"><img src="https://raw.githubusercontent.com/devlooped/sponsors/main/.github/avatars/eeseewy.png" alt="Eric C" title="Eric C" /></a>
+<a href="https://github.com/agocke"><img src="https://raw.githubusercontent.com/devlooped/sponsors/main/.github/avatars/agocke.png" alt="Andy Gocke" title="Andy Gocke" /></a></p>
+
+<!-- sponsors.md -->
+
+<p><a href="https://github.com/sponsors/devlooped"><img src="https://raw.githubusercontent.com/devlooped/sponsors/main/sponsor.png" alt="Sponsor this project" title="Sponsor this project" /></a>
+ </p>
+
+<p><a href="https://github.com/sponsors">Learn more about GitHub Sponsors</a></p>
+
+<!-- https://github.com/devlooped/sponsors/raw/main/footer.md -->
+
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        
+        <p class="copyright">json maintained by <a href="https://github.com/devlooped">devlooped</a></p>
+        
+        <p>Published with <a href="https://pages.github.com">GitHub Pages</a></p>
+      </footer>
+    </div>
+
+    
+  </body>
+</html>
